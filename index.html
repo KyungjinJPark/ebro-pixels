@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>EBro Pixels</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="A grid of pixels for EBro usage." />
+    <link rel="stylesheet" href="/static/css/reset.css" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <h1>EBro Pixels</h1>
+    <div class="pixel-grid"></div>
+    <script type="text/javascript" src="/static/js/scripts.js"></script>
+    <script>
+      setUpGrid({{.Width}}, {{.Height}}, {{.Pixels}})
+    </script>
+  </body>
+</html>
