@@ -1,3 +1,4 @@
+// Grid code
 const setUpGrid = (width, height, pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
   gridDiv.style.width = width * 2 + "em";
@@ -5,7 +6,14 @@ const setUpGrid = (width, height, pixels) => {
   pixels.forEach((pi, i) => {
     let pixelDiv = document.createElement("div");
     pixelDiv.className = "pixel";
-    pixelDiv.style.backgroundColor = pi === 1 ? "#F00" : "#FFF";
+
+    // TODO: this logic is repeated
+    const [r, g, b] = pi;
+    if (r >= 0) {
+      pixelDiv.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    } else {
+      pixelDiv.style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
+    }
 
     pixelDiv.onmouseenter = () => {
       pixelDiv.style.transform = "scale(1.1)";
@@ -33,6 +41,7 @@ const setUpGrid = (width, height, pixels) => {
       };
       let data = {
         PixelId: i,
+        RgbCode: currColor.rgbCode,
       };
       Http.send(JSON.stringify(data));
     };
@@ -43,12 +52,72 @@ const setUpGrid = (width, height, pixels) => {
 
 const updateGrid = (pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
+  // TODO: this logic is repeated
   pixels.forEach((pi, i) => {
-    gridDiv.childNodes[i].style.backgroundColor = pi === 1 ? "#F00" : "#FFF";
+    const [r, g, b] = pi;
+    if (r >= 0) {
+      gridDiv.childNodes[i].style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    } else {
+      gridDiv.childNodes[
+        i
+      ].style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
+    }
   });
 };
 
-const clearGrid = () => {
-  let gridDiv = document.getElementsByClassName("pixel-grid");
-  gridDiv[0].innerHTML = "";
+// Pallete code
+var currColor = {
+  rgbCode: [255, 0, 0],
+  rgbFake: [255, 0, 0],
+};
+
+// TODO: this is not scalable, probably
+const emojiDict = ["beter_LUL", "alex_tired"];
+
+const updatePreview = () => {
+  // TODO: this logic is repeated
+  const [r, g, b] = currColor.rgbCode;
+  if (r >= 0) {
+    document.getElementsByClassName(
+      "preview"
+    )[0].style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    document.getElementsByClassName("preview")[0].style.backgroundImage =
+      "none";
+  } else {
+    document.getElementsByClassName(
+      "preview"
+    )[0].style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
+  }
+};
+
+// TODO: this is not scalable, probably
+const setUpPalette = () => {
+  updatePreview();
+  document.getElementById("color-r").addEventListener("input", (event) => {
+    currColor.rgbFake[0] = parseInt(event.target.value);
+    currColor.rgbCode = currColor.rgbFake;
+    updatePreview();
+  });
+  document.getElementById("color-g").addEventListener("input", (event) => {
+    currColor.rgbFake[1] = parseInt(event.target.value);
+    currColor.rgbCode = currColor.rgbFake;
+    updatePreview();
+  });
+  document.getElementById("color-b").addEventListener("input", (event) => {
+    currColor.rgbFake[2] = parseInt(event.target.value);
+    currColor.rgbCode = currColor.rgbFake;
+    updatePreview();
+  });
+  document
+    .getElementById("emoji0-button")
+    .addEventListener("click", (event) => {
+      currColor.rgbCode = [-1, 0, 0];
+      updatePreview();
+    });
+  document
+    .getElementById("emoji1-button")
+    .addEventListener("click", (event) => {
+      currColor.rgbCode = [-1, 1, 0];
+      updatePreview();
+    });
 };

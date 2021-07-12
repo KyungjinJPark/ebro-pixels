@@ -12,7 +12,7 @@ import (
 type gridData struct {
 	Width  int
 	Height int
-	Pixels []int
+	Pixels [][]int
 }
 
 // Loads grid dimensions and pixel information
@@ -47,7 +47,7 @@ var indexTmpl = template.Must(template.ParseFiles("index.html"))
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	gdata, err := loadGridData()
 	if err != nil {
-		log.Printf("Error leading grid data: %v", err)
+		log.Printf("Error reading grid data: %v", err)
 		http.Error(w, "can't load grid data", http.StatusInternalServerError)
 		return
 	}
@@ -56,18 +56,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 // Loads grid dimensions and pixel information
 // Code stolen from golang json docs
-func changePixelData(index int) ([]byte, error) {
+func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	gdata, err := loadGridData()
 	if err != nil {
 		return nil, err
 	}
-
-	if gdata.Pixels[index] == 1 {
-		gdata.Pixels[index] = 0
-	} else {
-		gdata.Pixels[index] = 1
-	}
-	
+	gdata.Pixels[index] = rgbCode
 	data, err := saveGridData(gdata)
 	if err != nil {
 		return nil, err
@@ -83,9 +77,9 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// May want to make this a seperate function 
 	type message struct {
 		PixelId int
+		RgbCode []int
 	}
 	var m message
 	err = json.Unmarshal(body, &m)
@@ -94,8 +88,7 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
-
-	newGrid, err := changePixelData(m.PixelId)
+	newGrid, err := changePixelData(m.PixelId, m.RgbCode)
 	if err != nil {
 		log.Printf("Error saving grid data: %v", err)
 		http.Error(w, "can't save grid data", http.StatusInternalServerError)
@@ -110,5 +103,6 @@ func main() {
 	http.HandleFunc("/edit/", editPixelHandler)
 	http.HandleFunc("/", homeHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	log.Printf("Listening on port %s", ":8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -6,10 +6,9 @@ A lil pixel canvas for the eBros. Built on Go just because.
 
 ### The Todo
 
-- Allow all 255^3 colors of RGB
-  - Create color picker
-  - Create a set of image pixels users can paint
 - Allow "click and drag" drawing
+- Implement Client-and-Server-side validation
+- Make basic infrastructure scalable (prob a lot to write for this)
 - parallel computing
   - Allow line drawing
   - Allow triangle drawing (|| computing)
@@ -25,3 +24,6 @@ A lil pixel canvas for the eBros. Built on Go just because.
 - Allow clicking on pixels to toggle color
   - Save chages to JSON
 - Fetch grid data w/o refresh
+- Allow all 255^3 colors of RGB
+  - Create ~~color picker~~ palette
+  - Create a set of image pixels users can paint (emoji pixels)
