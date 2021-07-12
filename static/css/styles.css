@@ -11,6 +11,7 @@ body {
   background-color: grey;
 }
 .pixel {
+  position: relative;
   box-sizing: border-box;
   float: left;
   width: 2em;

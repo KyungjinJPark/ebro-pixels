@@ -5,22 +5,18 @@ const setUpGrid = (width, height, pixels) => {
   pixels.forEach((pi, i) => {
     let pixelDiv = document.createElement("div");
     pixelDiv.className = "pixel";
-
-    // Pixel color stuff
-    let pixelColor = null;
-    if (pi === 1) {
-      pixelColor = "#F00";
-    } else {
-      pixelColor = "#FFF";
-    }
-    pixelDiv.style.backgroundColor = pixelColor;
+    pixelDiv.style.backgroundColor = pi === 1 ? "#F00" : "#FFF";
 
     pixelDiv.onmouseenter = () => {
-      pixelDiv.style.backgroundColor = "greenyellow";
+      pixelDiv.style.transform = "scale(1.1)";
+      pixelDiv.style.zIndex = "100";
     };
     pixelDiv.onmouseout = () => {
-      pixelDiv.style.backgroundColor = pixelColor;
+      pixelDiv.style.transform = "scale(1)";
+      pixelDiv.style.zIndex = "10";
     };
+    pixelDiv.style.transform = "scale(1)";
+    pixelDiv.style.zIndex = "10";
 
     // On change color (server request)
     pixelDiv.onclick = () => {
@@ -31,9 +27,11 @@ const setUpGrid = (width, height, pixels) => {
       Http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
           // IDK what this 4 is...
-          let resp = this.responseText;
-          console.log("DEBUG:", resp);
-          location.reload();
+          let newGrid = JSON.parse(this.responseText);
+          // TODO: response should contain new grid data!!!!!
+          clearGrid();
+          setUpGrid(newGrid.Width, newGrid.Height, newGrid.Pixels);
+          // location.reload();
         }
       };
       let data = {
@@ -44,4 +42,9 @@ const setUpGrid = (width, height, pixels) => {
 
     gridDiv[0].appendChild(pixelDiv);
   });
+};
+
+const clearGrid = () => {
+  let gridDiv = document.getElementsByClassName("pixel-grid");
+  gridDiv[0].innerHTML = "";
 };

@@ -51,17 +51,17 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 // Loads grid dimensions and pixel information
 // Code stolen from golang json docs
-func savePixelData(index int) error {
+func savePixelData(index int) ([]byte, error) {
 	// Get data
 	filename := "data/grid.json"
 	jsonBlob, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var gdata gridData
 	err = json.Unmarshal(jsonBlob, &gdata)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if gdata.Pixels[index] == 1 {
@@ -73,10 +73,10 @@ func savePixelData(index int) error {
 	// Write out
 	data, err := json.Marshal(gdata)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ioutil.WriteFile(filename, data, 0600)
-	return nil
+	return data, nil
 }
 
 func editPixelHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,13 +99,13 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = savePixelData(m.PixelId)
+	newGrid, err := savePixelData(m.PixelId)
 	if err != nil {
 		log.Printf("Error saving grid data: %v", err)
 		http.Error(w, "can't save grid data", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "Success!")
+	fmt.Fprintf(w, string(newGrid))
 }
 
 func main() {
