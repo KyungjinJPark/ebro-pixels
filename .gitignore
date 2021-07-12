@@ -1,1 +1,5 @@
+# build
 webserver.exe
+
+# data
+data/grid.json
