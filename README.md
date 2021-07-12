@@ -6,7 +6,6 @@ A lil pixel canvas for the eBros. Built on Go just because.
 
 ### The Todo
 
-- Fetch grid data w/o refresh
 - Allow all 255^3 colors of RGB
   - Create color picker
   - Create a set of image pixels users can paint
@@ -25,3 +24,4 @@ A lil pixel canvas for the eBros. Built on Go just because.
 - Load grid info from JSON and serve
 - Allow clicking on pixels to toggle color
   - Save chages to JSON
+- Fetch grid data w/o refresh
