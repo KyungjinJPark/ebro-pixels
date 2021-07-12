@@ -6,7 +6,6 @@ A lil pixel canvas for the eBros. Built on Go just because.
 
 ### The Todo
 
-- Allow "click and drag" drawing
 - Implement Client-and-Server-side validation
 - Make basic infrastructure scalable (prob a lot to write for this)
 - Make it multiplayer
@@ -27,4 +26,5 @@ A lil pixel canvas for the eBros. Built on Go just because.
 - Fetch grid data w/o refresh
 - Allow all 255^3 colors of RGB
   - Create ~~color picker~~ palette
-  - Create a set of image pixels users can paint (emoji pixels)
+  - Create a set of image pixels users can draw (emoji pixels)
+- Allow "click and drag" drawing
