@@ -9,6 +9,7 @@ A lil pixel canvas for the eBros. Built on Go just because.
 - Allow "click and drag" drawing
 - Implement Client-and-Server-side validation
 - Make basic infrastructure scalable (prob a lot to write for this)
+- Make it multiplayer
 - parallel computing
   - Allow line drawing
   - Allow triangle drawing (|| computing)

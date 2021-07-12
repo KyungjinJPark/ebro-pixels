@@ -11,6 +11,7 @@ const setUpGrid = (width, height, pixels) => {
     const [r, g, b] = pi;
     if (r >= 0) {
       pixelDiv.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+      pixelDiv.style.backgroundImage = `none`;
     } else {
       pixelDiv.style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
     }
@@ -57,6 +58,9 @@ const updateGrid = (pixels) => {
     const [r, g, b] = pi;
     if (r >= 0) {
       gridDiv.childNodes[i].style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+      gridDiv.childNodes[
+        i
+      ].style.backgroundImage = `none`;
     } else {
       gridDiv.childNodes[
         i
