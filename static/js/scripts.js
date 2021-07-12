@@ -30,7 +30,7 @@ const setUpGrid = (width, height, pixels) => {
     }
 
     // On change color (server request)
-    const paint = () => {
+    const draw = () => {
       const Http = new XMLHttpRequest();
       const url = "/edit/";
       Http.open("POST", url, true);
@@ -51,14 +51,14 @@ const setUpGrid = (width, height, pixels) => {
 
     pixelDiv.onmousedown = () => {
       console.log("should be printing");
-      paint();
+      draw();
     };
     pixelDiv.onmouseover = () => {
       pixelDiv.style.transform = "scale(1.1)";
       pixelDiv.style.zIndex = "100";
       if (isDragging) {
         console.log("should be printing");
-        paint();
+        draw();
       }
     };
     pixelDiv.onmouseout = () => {
