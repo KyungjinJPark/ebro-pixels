@@ -14,6 +14,11 @@ A lil pixel canvas for the eBros. Built on Go just because.
   - Allow triangle drawing (|| computing)
   - sends pixel data to channels
 
+### Known Issues 🦗
+
+- Any mouse click will draw https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
+- If you draw too fast, data/grid.json gets corrupted
+
 ### The Done ✅
 
 - Create Go web server

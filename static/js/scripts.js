@@ -12,7 +12,10 @@ const setUpGrid = (width, height, pixels) => {
   gridDiv.addEventListener("mouseup", () => {
     isDragging = false;
   });
-  gridDiv.addEventListener("mouseleave", () => {
+  document.addEventListener("dragstart", () => {
+    isDragging = false;
+  });
+  document.addEventListener("mouseleave", () => {
     isDragging = false;
   });
 
@@ -50,14 +53,12 @@ const setUpGrid = (width, height, pixels) => {
     };
 
     pixelDiv.onmousedown = () => {
-      console.log("should be printing");
       draw();
     };
     pixelDiv.onmouseover = () => {
       pixelDiv.style.transform = "scale(1.1)";
       pixelDiv.style.zIndex = "100";
       if (isDragging) {
-        console.log("should be printing");
         draw();
       }
     };
@@ -67,6 +68,11 @@ const setUpGrid = (width, height, pixels) => {
     };
     pixelDiv.style.transform = "scale(1)";
     pixelDiv.style.zIndex = "10";
+
+    // Click and drag drawing code quirks
+    pixelDiv.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
 
     gridDiv.appendChild(pixelDiv);
   });
