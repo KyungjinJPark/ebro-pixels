@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"io"
 	"log"
-	"strings"
 
 	"encoding/json"
 	"html/template"
@@ -22,19 +19,27 @@ type gridData struct {
 // Code stolen from golang json docs
 func loadGridData() (*gridData, error) {
 	filename := "data/grid.json"
-	gridBytes, err := ioutil.ReadFile(filename)
+	jsonBlob, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	// TODO: change this to Unmarshal
-	dec := json.NewDecoder(strings.NewReader(string(gridBytes)))
 	var gdata gridData
-	if err := dec.Decode(&gdata); err == io.EOF {
-		//
-	} else if err != nil {
+	err = json.Unmarshal(jsonBlob, &gdata)
+	if err != nil {
 		return nil, err
 	}
 	return &gdata, nil
+}
+
+
+func saveGridData(gdata *gridData) ([]byte, error) {
+	filename := "data/grid.json"
+	data, err := json.Marshal(gdata)
+	if err != nil {
+		return nil, err
+	}
+	ioutil.WriteFile(filename, data, 0600)
+	return data, nil
 }
 
 var indexTmpl = template.Must(template.ParseFiles("index.html"))
@@ -51,15 +56,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 // Loads grid dimensions and pixel information
 // Code stolen from golang json docs
-func savePixelData(index int) ([]byte, error) {
-	// Get data
-	filename := "data/grid.json"
-	jsonBlob, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	var gdata gridData
-	err = json.Unmarshal(jsonBlob, &gdata)
+func changePixelData(index int) ([]byte, error) {
+	gdata, err := loadGridData()
 	if err != nil {
 		return nil, err
 	}
@@ -70,12 +68,10 @@ func savePixelData(index int) ([]byte, error) {
 		gdata.Pixels[index] = 1
 	}
 	
-	// Write out
-	data, err := json.Marshal(gdata)
+	data, err := saveGridData(gdata)
 	if err != nil {
 		return nil, err
 	}
-	ioutil.WriteFile(filename, data, 0600)
 	return data, nil
 }
 
@@ -99,13 +95,15 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newGrid, err := savePixelData(m.PixelId)
+	newGrid, err := changePixelData(m.PixelId)
 	if err != nil {
 		log.Printf("Error saving grid data: %v", err)
 		http.Error(w, "can't save grid data", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, string(newGrid))
+	w.WriteHeader(http.StatusOK) // 200
+	// WARN: Content-Length header automatically added b/c newGrid is under a few kilobytes
+	_, err = w.Write(newGrid)
 }
 
 func main() {
