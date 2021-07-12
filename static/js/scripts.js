@@ -3,6 +3,19 @@ const setUpGrid = (width, height, pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
   gridDiv.style.width = width * 2 + "em";
   gridDiv.style.height = height * 2 + "em";
+
+  // Click and drag drawing code
+  var isDragging = false;
+  gridDiv.addEventListener("mousedown", () => {
+    isDragging = true;
+  });
+  gridDiv.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+  gridDiv.addEventListener("mouseleave", () => {
+    isDragging = false;
+  });
+
   pixels.forEach((pi, i) => {
     let pixelDiv = document.createElement("div");
     pixelDiv.className = "pixel";
@@ -16,19 +29,8 @@ const setUpGrid = (width, height, pixels) => {
       pixelDiv.style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
     }
 
-    pixelDiv.onmouseenter = () => {
-      pixelDiv.style.transform = "scale(1.1)";
-      pixelDiv.style.zIndex = "100";
-    };
-    pixelDiv.onmouseout = () => {
-      pixelDiv.style.transform = "scale(1)";
-      pixelDiv.style.zIndex = "10";
-    };
-    pixelDiv.style.transform = "scale(1)";
-    pixelDiv.style.zIndex = "10";
-
     // On change color (server request)
-    pixelDiv.onclick = () => {
+    const paint = () => {
       const Http = new XMLHttpRequest();
       const url = "/edit/";
       Http.open("POST", url, true);
@@ -47,6 +49,25 @@ const setUpGrid = (width, height, pixels) => {
       Http.send(JSON.stringify(data));
     };
 
+    pixelDiv.onmousedown = () => {
+      console.log("should be printing");
+      paint();
+    };
+    pixelDiv.onmouseover = () => {
+      pixelDiv.style.transform = "scale(1.1)";
+      pixelDiv.style.zIndex = "100";
+      if (isDragging) {
+        console.log("should be printing");
+        paint();
+      }
+    };
+    pixelDiv.onmouseout = () => {
+      pixelDiv.style.transform = "scale(1)";
+      pixelDiv.style.zIndex = "10";
+    };
+    pixelDiv.style.transform = "scale(1)";
+    pixelDiv.style.zIndex = "10";
+
     gridDiv.appendChild(pixelDiv);
   });
 };
@@ -58,9 +79,7 @@ const updateGrid = (pixels) => {
     const [r, g, b] = pi;
     if (r >= 0) {
       gridDiv.childNodes[i].style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-      gridDiv.childNodes[
-        i
-      ].style.backgroundImage = `none`;
+      gridDiv.childNodes[i].style.backgroundImage = `none`;
     } else {
       gridDiv.childNodes[
         i
