@@ -6,7 +6,6 @@ A lil pixel canvas for the eBros. Built on Go just because.
 
 ### The Todo
 
-- Implement Client-and-Server-side validation
 - Make basic infrastructure scalable (prob a lot to write for this)
 - Make it multiplayer
 - parallel computing
@@ -33,3 +32,4 @@ A lil pixel canvas for the eBros. Built on Go just because.
   - Create ~~color picker~~ palette
   - Create a set of image pixels users can draw (emoji pixels)
 - Allow "click and drag" drawing
+- Implement Client-and-Server-side validation
