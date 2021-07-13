@@ -13,6 +13,8 @@ body {
 }
 .pixel {
   position: relative;
+  z-index: 10;
+  transform: scale(1);
   box-sizing: border-box;
   float: left;
   width: 2em;
@@ -30,6 +32,10 @@ body {
   -o-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+.pixel:hover {
+  z-index: 100;
+  transform: scale(1.1);
 }
 
 .preview {

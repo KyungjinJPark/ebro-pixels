@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	"encoding/json"
@@ -57,9 +58,15 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 // Loads grid dimensions and pixel information
 // Code stolen from golang json docs
 func changePixelData(index int, rgbCode []int) ([]byte, error) {
+	if index < 0 || len(rgbCode) != 3 {
+		return nil, errors.New("negative index or wrong number of rgb values")
+	}
 	gdata, err := loadGridData()
 	if err != nil {
 		return nil, err
+	}
+	if index >= len(gdata.Pixels) {
+		return nil, errors.New("slice index out of bounds")
 	}
 	gdata.Pixels[index] = rgbCode
 	data, err := saveGridData(gdata)

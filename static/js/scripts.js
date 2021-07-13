@@ -1,4 +1,20 @@
 // Grid code
+const renderPixel = (pidiv, [r, g, b]) => {
+  if (r >= 0) {
+    pidiv.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    pidiv.style.backgroundImage = `none`;
+  } else {
+    pidiv.style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
+  }
+};
+
+const updateGrid = (pixels) => {
+  let gridDiv = document.getElementsByClassName("pixel-grid")[0];
+  pixels.forEach((pi, i) => {
+    renderPixel(gridDiv.childNodes[i], pi);
+  });
+};
+
 const setUpGrid = (width, height, pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
   gridDiv.style.width = width * 2 + "em";
@@ -9,7 +25,7 @@ const setUpGrid = (width, height, pixels) => {
   gridDiv.addEventListener("mousedown", () => {
     isDragging = true;
   });
-  gridDiv.addEventListener("mouseup", () => {
+  document.addEventListener("mouseup", () => {
     isDragging = false;
   });
   document.addEventListener("dragstart", () => {
@@ -22,15 +38,7 @@ const setUpGrid = (width, height, pixels) => {
   pixels.forEach((pi, i) => {
     let pixelDiv = document.createElement("div");
     pixelDiv.className = "pixel";
-
-    // TODO: this logic is repeated
-    const [r, g, b] = pi;
-    if (r >= 0) {
-      pixelDiv.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-      pixelDiv.style.backgroundImage = `none`;
-    } else {
-      pixelDiv.style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
-    }
+    renderPixel(pixelDiv, pi);
 
     // On change color (server request)
     const draw = () => {
@@ -56,18 +64,10 @@ const setUpGrid = (width, height, pixels) => {
       draw();
     };
     pixelDiv.onmouseover = () => {
-      pixelDiv.style.transform = "scale(1.1)";
-      pixelDiv.style.zIndex = "100";
       if (isDragging) {
         draw();
       }
     };
-    pixelDiv.onmouseout = () => {
-      pixelDiv.style.transform = "scale(1)";
-      pixelDiv.style.zIndex = "10";
-    };
-    pixelDiv.style.transform = "scale(1)";
-    pixelDiv.style.zIndex = "10";
 
     // Click and drag drawing code quirks
     pixelDiv.addEventListener("contextmenu", (e) => {
@@ -75,22 +75,6 @@ const setUpGrid = (width, height, pixels) => {
     });
 
     gridDiv.appendChild(pixelDiv);
-  });
-};
-
-const updateGrid = (pixels) => {
-  let gridDiv = document.getElementsByClassName("pixel-grid")[0];
-  // TODO: this logic is repeated
-  pixels.forEach((pi, i) => {
-    const [r, g, b] = pi;
-    if (r >= 0) {
-      gridDiv.childNodes[i].style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-      gridDiv.childNodes[i].style.backgroundImage = `none`;
-    } else {
-      gridDiv.childNodes[
-        i
-      ].style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
-    }
   });
 };
 
@@ -119,21 +103,32 @@ const updatePreview = () => {
   }
 };
 
+const parseRgbInput = (event) => {
+  let input = parseInt(event.target.value);
+  if (input >= 0 && input <= 255) {
+    // do nothing
+  } else if (input > 255) {
+    input = 255;
+  } else {
+    input = 0;
+  }
+  return input;
+};
+
 // TODO: this is not scalable, probably
 const setUpPalette = () => {
   updatePreview();
-  document.getElementById("color-r").addEventListener("input", (event) => {
-    currColor.rgbFake[0] = parseInt(event.target.value);
-    currColor.rgbCode = currColor.rgbFake;
-    updatePreview();
+  ["r", "g", "b"].forEach((letter, i) => {
+    document
+      .getElementById(`color-${letter}`)
+      .addEventListener("input", (event) => {
+        currColor.rgbFake[i] = parseRgbInput(event);
+        event.target.value = parseRgbInput(event);
+        currColor.rgbCode = currColor.rgbFake;
+        updatePreview();
+      });
   });
-  document.getElementById("color-g").addEventListener("input", (event) => {
-    currColor.rgbFake[1] = parseInt(event.target.value);
-    currColor.rgbCode = currColor.rgbFake;
-    updatePreview();
-  });
-  document.getElementById("color-b").addEventListener("input", (event) => {
-    currColor.rgbFake[2] = parseInt(event.target.value);
+  document.getElementById("color-button").addEventListener("click", (event) => {
     currColor.rgbCode = currColor.rgbFake;
     updatePreview();
   });
