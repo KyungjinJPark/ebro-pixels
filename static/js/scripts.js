@@ -15,10 +15,25 @@ const updateGrid = (pixels) => {
   });
 };
 
+const getGrid = () => {
+  const Http = new XMLHttpRequest();
+  const url = "/get/";
+  Http.open("GET", url);
+  Http.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      // IDK what this 4 is...
+      let newGridData = JSON.parse(this.responseText);
+      updateGrid(newGridData.Pixels);
+    }
+  };
+  Http.send();
+};
+
 const setUpGrid = (width, height, pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
-  gridDiv.style.width = width * 2 + "em";
-  gridDiv.style.height = height * 2 + "em";
+  const cellSize = 1.75;
+  gridDiv.style.width = width * cellSize + "em";
+  gridDiv.style.height = height * cellSize + "em";
 
   // Click and drag drawing code
   var isDragging = false;
@@ -36,6 +51,8 @@ const setUpGrid = (width, height, pixels) => {
   pixels.forEach((pi, i) => {
     let pixelDiv = document.createElement("div");
     pixelDiv.className = "pixel";
+    pixelDiv.style.width = cellSize + "em";
+    pixelDiv.style.height = cellSize + "em";
     renderPixel(pixelDiv, pi);
 
     // On change color (server request)
@@ -74,6 +91,11 @@ const setUpGrid = (width, height, pixels) => {
 
     gridDiv.appendChild(pixelDiv);
   });
+
+  setInterval(() => {
+    console.log("got grid");
+    getGrid();
+  }, 100);
 };
 
 // Pallete code

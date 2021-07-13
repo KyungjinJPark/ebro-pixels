@@ -22,12 +22,12 @@ func loadGridData() (*gridData, error) {
 	filename := "data/grid.json"
 	jsonBlob, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + " ON ReadFile")
 	}
 	var gdata gridData
 	err = json.Unmarshal(jsonBlob, &gdata)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + " ON Unmarshal") // 2 fast error
 	}
 	return &gdata, nil
 }
@@ -63,7 +63,7 @@ func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	}
 	gdata, err := loadGridData()
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + " ON loadGridData")
 	}
 	if index >= len(gdata.Pixels) {
 		return nil, errors.New("slice index out of bounds")
@@ -71,7 +71,7 @@ func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	gdata.Pixels[index] = rgbCode
 	data, err := saveGridData(gdata)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + " ON saveGridData")
 	}
 	return data, nil
 }
@@ -106,8 +106,25 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write(newGrid)
 }
 
+
+func getGridHandler(w http.ResponseWriter, r *http.Request) {
+	filename := "data/grid.json"
+	jsonBlob, err := ioutil.ReadFile(filename)
+	if err != nil {
+		if err != nil {
+			log.Printf("Error reading grid data: %v", err)
+			http.Error(w, "can't get grid data", http.StatusInternalServerError)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK) // 200
+	// WARN: Content-Length header automatically added b/c newGrid is under a few kilobytes
+	_, err = w.Write(jsonBlob)
+}
+
 func main() {
 	http.HandleFunc("/edit/", editPixelHandler)
+	http.HandleFunc("/get/", getGridHandler)
 	http.HandleFunc("/", homeHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	log.Printf("Listening on port %s", ":8080")
