@@ -6,7 +6,6 @@ A lil pixel canvas for the eBros. Built on Go just because.
 
 ### The Todo
 
-- Make it multiplayer
 - parallel computing
   - Allow line drawing
   - Allow triangle drawing (|| computing)
@@ -36,3 +35,4 @@ A lil pixel canvas for the eBros. Built on Go just because.
 - Allow "click and drag" drawing
 - Implement Client-and-Server-side validation
 - Make basic infrastructure scalable (wasn't that much maybe b/c I look too closely)
+- Make it multiplayer
