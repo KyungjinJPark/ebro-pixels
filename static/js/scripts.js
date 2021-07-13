@@ -22,18 +22,16 @@ const setUpGrid = (width, height, pixels) => {
 
   // Click and drag drawing code
   var isDragging = false;
-  gridDiv.addEventListener("mousedown", () => {
+  const dragEnable = () => {
     isDragging = true;
-  });
-  document.addEventListener("mouseup", () => {
+  };
+  gridDiv.addEventListener("mousedown", dragEnable);
+  const dragDisable = () => {
     isDragging = false;
-  });
-  document.addEventListener("dragstart", () => {
-    isDragging = false;
-  });
-  document.addEventListener("mouseleave", () => {
-    isDragging = false;
-  });
+  };
+  document.addEventListener("mouseup", dragDisable);
+  document.addEventListener("dragstart", dragDisable);
+  document.addEventListener("mouseleave", dragDisable);
 
   pixels.forEach((pi, i) => {
     let pixelDiv = document.createElement("div");
@@ -84,23 +82,16 @@ var currColor = {
   rgbFake: [255, 0, 0],
 };
 
-// TODO: this is not scalable, probably
-const emojiDict = ["beter_LUL", "alex_tired"];
+const emojiDict = [
+  "beter_LUL",
+  "alex_tired",
+  "beter_finds_spring",
+  "myana",
+  "thomas_finna_diequik",
+];
 
 const updatePreview = () => {
-  // TODO: this logic is repeated
-  const [r, g, b] = currColor.rgbCode;
-  if (r >= 0) {
-    document.getElementsByClassName(
-      "preview"
-    )[0].style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-    document.getElementsByClassName("preview")[0].style.backgroundImage =
-      "none";
-  } else {
-    document.getElementsByClassName(
-      "preview"
-    )[0].style.backgroundImage = `url("/static/emojis/${emojiDict[g]}.png")`;
-  }
+  renderPixel(document.getElementsByClassName("preview")[0], currColor.rgbCode);
 };
 
 const parseRgbInput = (event) => {
@@ -115,33 +106,36 @@ const parseRgbInput = (event) => {
   return input;
 };
 
-// TODO: this is not scalable, probably
 const setUpPalette = () => {
+  // Initialize preview
   updatePreview();
+  // Initialize RGB controller
   ["r", "g", "b"].forEach((letter, i) => {
     document
       .getElementById(`color-${letter}`)
       .addEventListener("input", (event) => {
-        currColor.rgbFake[i] = parseRgbInput(event);
-        event.target.value = parseRgbInput(event);
+        let newVal = parseRgbInput(event);
+        currColor.rgbFake[i] = newVal;
+        event.target.value = newVal;
         currColor.rgbCode = currColor.rgbFake;
         updatePreview();
       });
   });
+  // Initialize buttons
   document.getElementById("color-button").addEventListener("click", (event) => {
     currColor.rgbCode = currColor.rgbFake;
     updatePreview();
   });
-  document
-    .getElementById("emoji0-button")
-    .addEventListener("click", (event) => {
-      currColor.rgbCode = [-1, 0, 0];
+  // Initialize emoji buttons
+  let controls = document.getElementsByClassName("controls")[0];
+  emojiDict.forEach((emojiName, i) => {
+    let emojiButton = document.createElement("button");
+    emojiButton.id = `emoji${i}-button`;
+    emojiButton.textContent = emojiName;
+    emojiButton.addEventListener("click", (event) => {
+      currColor.rgbCode = [-1, i, 0];
       updatePreview();
     });
-  document
-    .getElementById("emoji1-button")
-    .addEventListener("click", (event) => {
-      currColor.rgbCode = [-1, 1, 0];
-      updatePreview();
-    });
+    controls.appendChild(emojiButton);
+  });
 };
