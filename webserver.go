@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"log"
-	"math"
 
 	"encoding/json"
 	"html/template"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/KyungjinJPark/pixels-for-friends/drawing"
 )
 
 type gridData struct {
@@ -32,7 +33,6 @@ func loadGridData() (*gridData, error) {
 	}
 	return &gdata, nil
 }
-
 
 func saveGridData(gdata *gridData) ([]byte, error) {
 	filename := "data/grid.json"
@@ -78,109 +78,24 @@ func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	return data, nil
 }
 
-func indexToCoords(i int) (int, int, error) {
+func indexToCoords(i int) ([]int, error) {
 	// TODO: Probably don't want to be doing this every time (causes uneeded error)
-	gdata, err := loadGridData()
-	if err != nil {
-		return -1, -1, err
-	}
-	x := i % gdata.Width
-	y := i / gdata.Width
-	return x, y, nil
-}
-
-// I stole this drawing code from: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-func plotLineLow(x0, y0, x1, y1 int) [][]int {
-	ret := [][]int{}
-
-    dx := x1 - x0
-    dy := y1 - y0
-    yi := 1
-    if dy < 0 {
-        yi = -1
-        dy = -dy
-	}
-    D := (2 * dy) - dx
-    y := y0
-
-    for x := x0; x <= x1; x++ {
-		ret = append(ret, []int{x,y})
-        if D > 0 {
-			y = y + yi
-            D = D + (2 * (dy - dx))
-		} else {
-			D = D + 2*dy
-		}
-	}
-
-	return ret
-}
-
-func plotLineHigh(x0, y0, x1, y1 int) [][]int {
-	ret := [][]int{}
-
-    dx := x1 - x0
-    dy := y1 - y0
-    xi := 1
-    if dx < 0 {
-		xi = -1
-        dx = -dx
-	}
-    D := (2 * dx) - dy
-    x := x0
-
-    for y := y0; y <= y1; y++ {
-		ret = append(ret, []int{x,y})
-        if D > 0 {
-			x = x + xi
-            D = D + (2 * (dx - dy))
-		} else {
-			D = D + 2*dx
-		}
-	}
-
-	return ret
-}
-
-func bresenham(x0, y0, x1, y1 int) [][]int {
-	if math.Abs(float64(y1 - y0)) < math.Abs(float64(x1 - x0)) {
-		if x0 > x1 {
-			return plotLineLow(x1, y1, x0, y0)
-		} else {
-			return plotLineLow(x0, y0, x1, y1)
-		}
-	}
-	return plotLineHigh(x0, y0, x1, y1)
-}
-
-func drawLine(indicies []int, rgbCode []int) ([]byte, error)  {
-	var x0, y0, x1, y1 int
-	if (indicies[0] < indicies[1]) {
-		x0, y0, _ = indexToCoords(indicies[0])
-		x1, y1, _ = indexToCoords(indicies[1])
-	} else {
-		x0, y0, _ = indexToCoords(indicies[1])
-		x1, y1, _ = indexToCoords(indicies[0])
-	}
-	points := bresenham(x0, y0, x1, y1)
-
-
-	// TODO: DEFINITELY don't want to be doing this every time (causes uneeded error)
 	gdata, err := loadGridData()
 	if err != nil {
 		return nil, err
 	}
+	x := i % gdata.Width
+	y := i / gdata.Width
+	return []int{x, y}, nil
+}
 
-	var newGrid []byte
-	for _, pt := range points {
-		pi := pt[0] + pt[1] * gdata.Width
-		newGrid, err = changePixelData(pi, rgbCode)
-		if err != nil {
-			return nil, err
-		}
+func coordsToIndex(coord []int) (int, error) {
+	// TODO: Probably don't want to be doing this every time (causes uneeded error)
+	gdata, err := loadGridData()
+	if err != nil {
+		return -1, err
 	}
-
-	return newGrid, nil
+	return coord[0] + coord[1] * gdata.Width, nil
 }
 
 func editPixelHandler(w http.ResponseWriter, r *http.Request) {
@@ -203,12 +118,21 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
+
 	var newGrid []byte
 	switch m.Tool {
 	case "point":
 		newGrid, err = changePixelData(m.PixelIds[0], m.RgbCode)
 	case "line": 
-		newGrid, err = drawLine(m.PixelIds, m.RgbCode)
+		c1, _ := indexToCoords(m.PixelIds[0]) // TODO: These errors shouldn't be here for long
+		c2, _ := indexToCoords(m.PixelIds[0])
+		coords, err := drawing.CalcLinePixels([][]int{c1, c2}, m.RgbCode)
+		if err == nil {
+			for _, coord := range coords {
+				i, _ := coordsToIndex(coord)
+				newGrid, err = changePixelData(i, m.RgbCode)
+			}
+		}
 	}
 	if err != nil {
 		log.Printf("Error saving grid data: %v", err)

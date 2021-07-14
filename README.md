@@ -7,10 +7,12 @@ A lil pixel canvas for the eBros. Built on Go just because.
 ### The Todo
 
 - parallel computing
-  - Allow line drawing
+  - Allow line drawing ✅
+  - Optimize line drawing
   - Allow triangle drawing (|| computing)
-  - sends pixel data to channels
-  - go mod drawing algorithms
+    - Write algorithm to send pixel data to channels
+  - Create seperate package from drawing algorithms ✅
+    - Removed webserver.exe. Use "go install . && pixels-for-friends.exe" to build and run ✅
 - Color picker
 
 ### Known Issues 🦗
