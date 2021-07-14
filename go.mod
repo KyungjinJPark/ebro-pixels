@@ -1,3 +1,3 @@
-module github.com/KyungjinJPark/pixels-for-friends
+module github.com/KyungjinJPark/ebro-pixels
 
 go 1.16

@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/KyungjinJPark/pixels-for-friends/drawing"
+	"github.com/KyungjinJPark/ebro-pixels/drawing"
 )
 
 type gridData struct {

@@ -1,6 +1,6 @@
-# EBros Pixels 👾
+# Ebro Pixels 👾
 
-A lil pixel canvas for the eBros. Built on Go just because.
+A lil pixel canvas for the 'eBro's. Built on Go just because.
 
 ## The Jira 📋
 
@@ -12,7 +12,7 @@ A lil pixel canvas for the eBros. Built on Go just because.
   - Allow triangle drawing (|| computing)
     - Write algorithm to send pixel data to channels
   - Create seperate package from drawing algorithms ✅
-    - Removed webserver.exe. Use "go install . && pixels-for-friends.exe" to build and run ✅
+    - Removed webserver.exe. Use "go install . && ebro-pixels.exe" to build and run ✅
 - Color picker
 
 ### Known Issues 🦗
