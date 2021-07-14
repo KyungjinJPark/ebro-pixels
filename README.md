@@ -10,6 +10,7 @@ A lil pixel canvas for the eBros. Built on Go just because.
   - Allow line drawing
   - Allow triangle drawing (|| computing)
   - sends pixel data to channels
+  - go mod drawing algorithms
 - Color picker
 
 ### Known Issues 🦗
@@ -18,6 +19,7 @@ A lil pixel canvas for the eBros. Built on Go just because.
 - If you draw too fast:
   - data/grid.json gets corrupted
   - "Error saving grid data: unexpected end of JSON input ON loadGridData"
+- App slows down over time
 
 ### The Done ✅
 

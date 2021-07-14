@@ -29,6 +29,9 @@ const getGrid = () => {
   Http.send();
 };
 
+var isDragging = false;
+var selected = null;
+
 const setUpGrid = (width, height, pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
   const cellSize = 1.75;
@@ -36,7 +39,6 @@ const setUpGrid = (width, height, pixels) => {
   gridDiv.style.height = height * cellSize + "em";
 
   // Click and drag drawing code
-  var isDragging = false;
   const dragEnable = () => {
     isDragging = true;
   };
@@ -69,18 +71,64 @@ const setUpGrid = (width, height, pixels) => {
         }
       };
       let data = {
-        PixelId: i,
+        Tool: currColor.tool,
+        PixelIds: [i],
         RgbCode: currColor.rgbCode,
       };
       Http.send(JSON.stringify(data));
     };
 
+    const select = () => {
+      if (selected === null) {
+        selected = i;
+      } else {
+        const Http = new XMLHttpRequest();
+        const url = "/edit/";
+        Http.open("POST", url, true);
+        Http.setRequestHeader("Content-Type", "application/json");
+        Http.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            // IDK what this 4 is...
+            let newGrid = JSON.parse(this.responseText);
+            updateGrid(newGrid.Pixels);
+          }
+        };
+        let data = {
+          Tool: currColor.tool,
+          PixelIds: [selected, i],
+          RgbCode: currColor.rgbCode,
+        };
+        Http.send(JSON.stringify(data));
+
+        selected = null;
+      }
+    };
+
     pixelDiv.onmousedown = () => {
-      draw();
+      switch (currColor.tool) {
+        case "point":
+          draw();
+          break;
+        case "line":
+          select();
+          break;
+        default:
+          console.log("what the heck u do");
+          break;
+      }
     };
     pixelDiv.onmouseover = () => {
-      if (isDragging) {
-        draw();
+      switch (currColor.tool) {
+        case "point":
+          if (isDragging) {
+            draw();
+          }
+          break;
+        case "line":
+          break;
+        default:
+          console.log("what the heck u do");
+          break;
       }
     };
 
@@ -93,7 +141,6 @@ const setUpGrid = (width, height, pixels) => {
   });
 
   setInterval(() => {
-    console.log("got grid");
     getGrid();
   }, 100);
 };
@@ -102,6 +149,7 @@ const setUpGrid = (width, height, pixels) => {
 var currColor = {
   rgbCode: [255, 0, 0],
   rgbFake: [255, 0, 0],
+  tool: "point",
 };
 
 const emojiDict = [
@@ -146,6 +194,12 @@ const setUpPalette = () => {
   // Initialize buttons
   document.getElementById("color-button").addEventListener("click", (event) => {
     currColor.rgbCode = currColor.rgbFake;
+    currColor.tool = "point";
+    updatePreview();
+  });
+  document.getElementById("line-button").addEventListener("click", (event) => {
+    currColor.rgbCode = currColor.rgbFake;
+    currColor.tool = "line";
     updatePreview();
   });
   // Initialize emoji buttons
@@ -156,6 +210,7 @@ const setUpPalette = () => {
     emojiButton.textContent = emojiName;
     emojiButton.addEventListener("click", (event) => {
       currColor.rgbCode = [-1, i, 0];
+      currColor.tool = "point";
       updatePreview();
     });
     controls.appendChild(emojiButton);
