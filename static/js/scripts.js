@@ -30,7 +30,7 @@ const getGrid = () => {
 };
 
 var isDragging = false;
-var selected = null;
+var selected = [null, null];
 
 const setUpGrid = (width, height, pixels) => {
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
@@ -78,9 +78,41 @@ const setUpGrid = (width, height, pixels) => {
       Http.send(JSON.stringify(data));
     };
 
+    // TODO: this seems really not scalable...
     const select = () => {
-      if (selected === null) {
-        selected = i;
+      if (selected[0] === null) {
+        selected[0] = i;
+        gridDiv.childNodes[i].classList.add("breathing");
+      } else if (currColor.tool === "line") {
+        const Http = new XMLHttpRequest();
+        const url = "/edit/";
+        Http.open("POST", url, true);
+        Http.setRequestHeader("Content-Type", "application/json");
+        Http.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            // IDK what this 4 is...
+            let newGrid = JSON.parse(this.responseText);
+            updateGrid(newGrid.Pixels);
+          }
+        };
+        let data = {
+          Tool: currColor.tool,
+          PixelIds: [selected[0], i],
+          RgbCode: currColor.rgbCode,
+        };
+        Http.send(JSON.stringify(data));
+
+        if (selected[0] != null) {
+          gridDiv.childNodes[selected[0]].classList.remove("breathing");
+          selected[0] = null;
+        }
+        if (selected[1] != null) {
+          gridDiv.childNodes[selected[1]].classList.remove("breathing");
+          selected[1] = null;
+        }
+      } else if (selected[1] === null) {
+        selected[1] = i;
+        gridDiv.childNodes[i].classList.add("breathing");
       } else {
         const Http = new XMLHttpRequest();
         const url = "/edit/";
@@ -95,12 +127,19 @@ const setUpGrid = (width, height, pixels) => {
         };
         let data = {
           Tool: currColor.tool,
-          PixelIds: [selected, i],
+          PixelIds: [selected[0], selected[1], i],
           RgbCode: currColor.rgbCode,
         };
         Http.send(JSON.stringify(data));
 
-        selected = null;
+        if (selected[0] != null) {
+          gridDiv.childNodes[selected[0]].classList.remove("breathing");
+          selected[0] = null;
+        }
+        if (selected[1] != null) {
+          gridDiv.childNodes[selected[1]].classList.remove("breathing");
+          selected[1] = null;
+        }
       }
     };
 
@@ -110,6 +149,9 @@ const setUpGrid = (width, height, pixels) => {
           draw();
           break;
         case "line":
+          select();
+          break;
+        case "triangle":
           select();
           break;
         default:
@@ -125,6 +167,8 @@ const setUpGrid = (width, height, pixels) => {
           }
           break;
         case "line":
+          break;
+        case "triangle":
           break;
         default:
           console.log("what the heck u do");
@@ -161,7 +205,9 @@ const emojiDict = [
 ];
 
 const updatePreview = () => {
-  renderPixel(document.getElementsByClassName("preview")[0], currColor.rgbCode);
+  const prev = document.getElementsByClassName("preview")[0];
+  renderPixel(prev, currColor.rgbCode);
+  prev.textContent = currColor.tool;
 };
 
 const parseRgbInput = (event) => {
@@ -191,15 +237,9 @@ const setUpPalette = () => {
         updatePreview();
       });
   });
-  // Initialize buttons
+  // Initialize color buttons
   document.getElementById("color-button").addEventListener("click", (event) => {
     currColor.rgbCode = currColor.rgbFake;
-    currColor.tool = "point";
-    updatePreview();
-  });
-  document.getElementById("line-button").addEventListener("click", (event) => {
-    currColor.rgbCode = currColor.rgbFake;
-    currColor.tool = "line";
     updatePreview();
   });
   // Initialize emoji buttons
@@ -210,9 +250,20 @@ const setUpPalette = () => {
     emojiButton.textContent = emojiName;
     emojiButton.addEventListener("click", (event) => {
       currColor.rgbCode = [-1, i, 0];
-      currColor.tool = "point";
       updatePreview();
     });
     controls.appendChild(emojiButton);
+  });
+  controls.appendChild(document.createElement("br"));
+  // Initialize tool buttons
+  ["point", "line", "triangle"].forEach((toolName) => {
+    let toolButton = document.createElement("button");
+    toolButton.id = `${toolName}-button`;
+    toolButton.textContent = `draw ${toolName}`;
+    toolButton.addEventListener("click", (event) => {
+      currColor.tool = toolName;
+      updatePreview();
+    });
+    controls.appendChild(toolButton);
   });
 };

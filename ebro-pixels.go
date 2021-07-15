@@ -141,15 +141,26 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		newGrid, err = changePixelData(m.PixelIds[0], m.RgbCode)
 	case "line": 
 		c1 := indexToCoords(m.PixelIds[0])
-		c2 := indexToCoords(m.PixelIds[0])
-		coords, err := drawing.CalcLinePixels([][]int{c1, c2}, m.RgbCode)
-		if err == nil {
+		c2 := indexToCoords(m.PixelIds[1])
+		coords := drawing.CalcLinePixels([][]int{c1, c2})
 			for _, coord := range coords {
 				i := coordsToIndex(coord)
 				newGrid, err = changePixelData(i, m.RgbCode)
 				if err != nil {
 					break
 				}
+			}
+	case "triangle": 
+		c1 := indexToCoords(m.PixelIds[0])
+		c2 := indexToCoords(m.PixelIds[1])
+		c3 := indexToCoords(m.PixelIds[2])
+		cha := make(chan []int, 10)
+		go drawing.CalcTrianglePixels([][]int{c1, c2, c3}, cha)
+		for coord := range cha {
+			i := coordsToIndex(coord)
+			newGrid, err = changePixelData(i, m.RgbCode)
+			if err != nil {
+				break
 			}
 		}
 	}

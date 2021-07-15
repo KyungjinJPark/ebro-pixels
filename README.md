@@ -6,13 +6,6 @@ A lil pixel canvas for the 'eBro's. Built on Go just because.
 
 ### The Todo
 
-- parallel computing
-  - Allow line drawing ✅
-  - Optimize line drawing++ ✅
-  - Allow triangle drawing (|| computing)
-    - Write algorithm to send pixel data to channels
-  - Create seperate package from drawing algorithms ✅
-    - Removed webserver.exe. Use "go install . && ebro-pixels.exe" to build and run ✅
 - Color picker
 
 ### Known Issues 🦗
@@ -40,3 +33,10 @@ A lil pixel canvas for the 'eBro's. Built on Go just because.
 - Implement Client-and-Server-side validation
 - Make basic infrastructure scalable (wasn't that much maybe b/c I look too closely)
 - Make it multiplayer
+- Allow Line Drawing
+  - Optimize line drawing++
+  - Create seperate package from drawing algorithms
+    - Note: Use "go install . && ebro-pixels.exe" to build and run
+- Allow triangle drawing
+  - Implement a parallel computing solution that uses channels
+- Indicate where selected pixels are

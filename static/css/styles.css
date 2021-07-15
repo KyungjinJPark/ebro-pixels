@@ -38,6 +38,24 @@ body {
   transform: scale(1.1);
 }
 
+/* Reference: https://vmar76.medium.com/using-css-animations-to-visualize-breathing-techniques-7a20ee0aed5a */
+.breathing {
+  position: relative;
+  z-index: 90;
+  animation: breathe 4s linear infinite;
+}
+@keyframes breathe {
+  0% {
+    box-shadow: 0 0 0 15px rgba(188, 237, 243, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 25px rgba(188, 237, 243, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 15px rgba(188, 237, 243, 0.6);
+  }
+}
+
 .preview {
   display: inline-block;
   width: 5em;

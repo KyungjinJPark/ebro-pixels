@@ -73,7 +73,17 @@ func bresenham(x0, y0, x1, y1 int) [][]int {
 	}
 }
 
-func CalcLinePixels(coords [][]int, rgbCode []int) ([][]int, error)  {
+func CalcLinePixels(coords [][]int) ([][]int)  {
 	lineCoords := bresenham(coords[0][0], coords[0][1], coords[1][0], coords[1][1])
-	return lineCoords, nil
+	return lineCoords
+}
+
+func CalcTrianglePixels(coords [][]int, ch chan []int) {
+	for i := 0; i <= 2; i++ {
+		lineCoords := bresenham(coords[i][0], coords[i][1], coords[(i + 1) % 3][0], coords[(i + 1) % 3][1])
+		for _, c := range lineCoords {
+			ch <- c
+		}
+	}
+	close(ch)
 }
