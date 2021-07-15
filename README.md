@@ -6,14 +6,14 @@ A lil pixel canvas for the 'eBro's. Built on Go just because.
 
 ### The Todo
 
-- Color picker
+- n😅thing
 
 ### Known Issues 🦗
 
 - Any mouse click will draw https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
 - If you draw too fast:
   - data/grid.json gets corrupted
-  - "Error saving grid data: unexpected end of JSON input ON loadGridData"
+  - "Error saving grid data: unexpected end of JSON input ON Unmarshal ON loadGridData"
 - App slows down over time
 
 ### The Done ✅
@@ -40,3 +40,4 @@ A lil pixel canvas for the 'eBro's. Built on Go just because.
 - Allow triangle drawing
   - Implement a parallel computing solution that uses channels
 - Indicate where selected pixels are
+- Create a eyedropper tool

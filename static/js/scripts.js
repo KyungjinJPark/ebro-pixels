@@ -8,7 +8,12 @@ const renderPixel = (pidiv, [r, g, b]) => {
   }
 };
 
+// TODO: This is a stopgag solution for Color Picker
+var globalPixels = undefined;
+
 const updateGrid = (pixels) => {
+  // TODO: This is a stopgag solution for Color Picker
+  globalPixels = pixels;
   let gridDiv = document.getElementsByClassName("pixel-grid")[0];
   pixels.forEach((pi, i) => {
     renderPixel(gridDiv.childNodes[i], pi);
@@ -143,6 +148,16 @@ const setUpGrid = (width, height, pixels) => {
       }
     };
 
+    // TODO: the workaround to get this working is kinda jank
+    const pickColor = () => {
+      // currColor.tool = "point";
+      if (globalPixels[i][0] != -1) {
+        currColor.rgbFake = globalPixels[i];
+      }
+      currColor.rgbCode = globalPixels[i];
+      updatePreview();
+    };
+
     pixelDiv.onmousedown = () => {
       switch (currColor.tool) {
         case "point":
@@ -153,6 +168,9 @@ const setUpGrid = (width, height, pixels) => {
           break;
         case "triangle":
           select();
+          break;
+        case "color-picker":
+          pickColor();
           break;
         default:
           console.log("what the heck u do");
@@ -169,6 +187,8 @@ const setUpGrid = (width, height, pixels) => {
         case "line":
           break;
         case "triangle":
+          break;
+        case "color-picker":
           break;
         default:
           console.log("what the heck u do");
@@ -256,7 +276,7 @@ const setUpPalette = () => {
   });
   controls.appendChild(document.createElement("br"));
   // Initialize tool buttons
-  ["point", "line", "triangle"].forEach((toolName) => {
+  ["point", "line", "triangle", "color-picker"].forEach((toolName) => {
     let toolButton = document.createElement("button");
     toolButton.id = `${toolName}-button`;
     toolButton.textContent = `draw ${toolName}`;
