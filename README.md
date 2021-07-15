@@ -8,7 +8,7 @@ A lil pixel canvas for the 'eBro's. Built on Go just because.
 
 - parallel computing
   - Allow line drawing ✅
-  - Optimize line drawing
+  - Optimize line drawing++ ✅
   - Allow triangle drawing (|| computing)
     - Write algorithm to send pixel data to channels
   - Create seperate package from drawing algorithms ✅

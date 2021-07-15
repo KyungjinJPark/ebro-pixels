@@ -18,30 +18,64 @@ type gridData struct {
 	Pixels [][]int
 }
 
+var GRID_FILENAME string = "data/grid.json"
+
+// A global state that only stores grid dimensions. Loaded on server launch
+var dimensions = panicLoadDimensions(loadGridData())
+func panicLoadDimensions(gd *gridData, err error) *gridData {
+	if err != nil {
+		panic("oh no")
+	}
+	return gd
+}
+
 // Loads grid dimensions and pixel information
 // Code stolen from golang json docs
+func loadGridJson() ([]byte, error) {
+	jsonBlob, err := ioutil.ReadFile(GRID_FILENAME)
+	if err != nil {
+		return nil, err
+	}
+	return jsonBlob, nil
+}
 func loadGridData() (*gridData, error) {
-	filename := "data/grid.json"
-	jsonBlob, err := ioutil.ReadFile(filename)
+	jsonBlob, err := loadGridJson()
 	if err != nil {
 		return nil, errors.New(err.Error() + " ON ReadFile")
 	}
 	var gdata gridData
-	err = json.Unmarshal(jsonBlob, &gdata)
-	if err != nil {
+	if err = json.Unmarshal(jsonBlob, &gdata); err != nil {
 		return nil, errors.New(err.Error() + " ON Unmarshal") // 2 fast error
 	}
 	return &gdata, nil
 }
 
 func saveGridData(gdata *gridData) ([]byte, error) {
-	filename := "data/grid.json"
 	data, err := json.Marshal(gdata)
 	if err != nil {
 		return nil, err
 	}
-	ioutil.WriteFile(filename, data, 0600)
+	ioutil.WriteFile(GRID_FILENAME, data, 0600)
 	return data, nil
+}
+
+func respError(w http.ResponseWriter, errmsg string, err error, code int) {
+	log.Printf("%s: %v", errmsg, err)
+	http.Error(w, errmsg, code)
+}
+
+func getGridHandler(w http.ResponseWriter, r *http.Request) {
+	jsonBlob, err := loadGridJson()
+	if err != nil {
+		respError(w, "Error loading grid data", err, http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK) // 200
+	// WARN: Content-Length header automatically added b/c newGrid is under a few kilobytes
+	if _, err = w.Write(jsonBlob); err != nil {
+		respError(w, "Error writing response", err, http.StatusInternalServerError)
+		return
+	}
 }
 
 var indexTmpl = template.Must(template.ParseFiles("index.html"))
@@ -50,8 +84,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: Not sure if I want to be doing this every time
 	gdata, err := loadGridData()
 	if err != nil {
-		log.Printf("Error reading grid data: %v", err)
-		http.Error(w, "can't load grid data", http.StatusInternalServerError)
+		respError(w, "Error loading grid data", err, http.StatusInternalServerError)
 		return
 	}
 	indexTmpl.Execute(w, gdata)
@@ -78,32 +111,17 @@ func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	return data, nil
 }
 
-func indexToCoords(i int) ([]int, error) {
-	// TODO: Probably don't want to be doing this every time (causes uneeded error)
-	gdata, err := loadGridData()
-	if err != nil {
-		return nil, err
-	}
-	x := i % gdata.Width
-	y := i / gdata.Width
-	return []int{x, y}, nil
+func indexToCoords(i int) ([]int) {
+	return []int{i % dimensions.Width, i / dimensions.Width}
 }
-
-func coordsToIndex(coord []int) (int, error) {
-	// TODO: Probably don't want to be doing this every time (causes uneeded error)
-	gdata, err := loadGridData()
-	if err != nil {
-		return -1, err
-	}
-	return coord[0] + coord[1] * gdata.Width, nil
+func coordsToIndex(coord []int) (int) {
+	return coord[0] + coord[1] * dimensions.Width
 }
 
 func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("Error reading body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
-		return
+		respError(w, "Error reading request body", err, http.StatusBadRequest)
 	}
 	
 	type message struct {
@@ -112,10 +130,8 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 		RgbCode  []int
 	}
 	var m message
-	err = json.Unmarshal(body, &m)
-	if err != nil {
-		log.Printf("Error decoding body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
+	if err = json.Unmarshal(body, &m); err != nil {
+		respError(w, "Error decoding request body", err, http.StatusBadRequest)
 		return
 	}
 
@@ -124,45 +140,34 @@ func editPixelHandler(w http.ResponseWriter, r *http.Request) {
 	case "point":
 		newGrid, err = changePixelData(m.PixelIds[0], m.RgbCode)
 	case "line": 
-		c1, _ := indexToCoords(m.PixelIds[0]) // TODO: These errors shouldn't be here for long
-		c2, _ := indexToCoords(m.PixelIds[0])
+		c1 := indexToCoords(m.PixelIds[0])
+		c2 := indexToCoords(m.PixelIds[0])
 		coords, err := drawing.CalcLinePixels([][]int{c1, c2}, m.RgbCode)
 		if err == nil {
 			for _, coord := range coords {
-				i, _ := coordsToIndex(coord)
+				i := coordsToIndex(coord)
 				newGrid, err = changePixelData(i, m.RgbCode)
+				if err != nil {
+					break
+				}
 			}
 		}
 	}
 	if err != nil {
-		log.Printf("Error saving grid data: %v", err)
-		http.Error(w, "can't save grid data", http.StatusInternalServerError)
+		respError(w, "Error saving grid data", err, http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK) // 200
 	// WARN: Content-Length header automatically added b/c newGrid is under a few kilobytes
-	_, err = w.Write(newGrid)
-}
-
-
-func getGridHandler(w http.ResponseWriter, r *http.Request) {
-	filename := "data/grid.json"
-	jsonBlob, err := ioutil.ReadFile(filename)
-	if err != nil {
-		if err != nil {
-			log.Printf("Error reading grid data: %v", err)
-			http.Error(w, "can't get grid data", http.StatusInternalServerError)
-			return
-		}
+	if _, err = w.Write(newGrid); err != nil {
+		respError(w, "Error writing response", err, http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(http.StatusOK) // 200
-	// WARN: Content-Length header automatically added b/c newGrid is under a few kilobytes
-	_, err = w.Write(jsonBlob)
 }
 
 func main() {
-	http.HandleFunc("/edit/", editPixelHandler)
 	http.HandleFunc("/get/", getGridHandler)
+	http.HandleFunc("/edit/", editPixelHandler)
 	http.HandleFunc("/", homeHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	log.Printf("Listening on port %s", ":8080")
