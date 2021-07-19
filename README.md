@@ -8,12 +8,6 @@ Use `go install . && ebro-pixels.exe` to build and run
 
 ### The Todo
 
-- Fix Known Issues
-  - Any mouse click will draw ✅
-  - If you draw too fast:
-    - data/grid.json gets corrupted
-      - make a queue of operations
-  - "Error saving grid data: unexpected end of JSON input ON Unmarshal ON loadGridData"
 - Is there a better way to send updates to clients?
   - Maybe seperate TCP server
 - Decrease the number of storage read/writes w local copy

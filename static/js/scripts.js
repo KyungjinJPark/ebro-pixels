@@ -76,8 +76,10 @@ const setUpGrid = (width, height, pixels) => {
       Http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
           // IDK what this 4 is...
-          let newGrid = JSON.parse(this.responseText);
-          updateGrid(newGrid.Pixels);
+          // TODO: I removed this beacuse it was causing a blinking issue, but maybe it
+          // --- would be better if the client kept a version of the grid in memory
+          // let newGrid = JSON.parse(this.responseText);
+          // updateGrid(newGrid.Pixels);
         }
       };
       let data = {
@@ -101,8 +103,8 @@ const setUpGrid = (width, height, pixels) => {
         Http.onreadystatechange = function () {
           if (this.readyState == 4 && this.status == 200) {
             // IDK what this 4 is...
-            let newGrid = JSON.parse(this.responseText);
-            updateGrid(newGrid.Pixels);
+            // let newGrid = JSON.parse(this.responseText);
+            // updateGrid(newGrid.Pixels);
           }
         };
         let data = {

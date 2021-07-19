@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log"
+	"sync"
 
 	"encoding/json"
 	"html/template"
@@ -12,13 +13,15 @@ import (
 	"github.com/KyungjinJPark/ebro-pixels/drawing"
 )
 
+var EDIT_MU sync.Mutex
+var GRID_FILENAME string = "data/grid.json"
+
 type gridData struct {
 	Width  int
 	Height int
 	Pixels [][]int
 }
 
-var GRID_FILENAME string = "data/grid.json"
 
 // A global state that only stores grid dimensions. Loaded on server launch
 var dimensions = panicLoadDimensions(loadGridData())
@@ -96,6 +99,7 @@ func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	if index < 0 || len(rgbCode) != 3 {
 		return nil, errors.New("negative index or wrong number of rgb values")
 	}
+	EDIT_MU.Lock()
 	gdata, err := loadGridData()
 	if err != nil {
 		return nil, errors.New(err.Error() + " ON loadGridData")
@@ -105,6 +109,7 @@ func changePixelData(index int, rgbCode []int) ([]byte, error) {
 	}
 	gdata.Pixels[index] = rgbCode
 	data, err := saveGridData(gdata)
+	EDIT_MU.Unlock()
 	if err != nil {
 		return nil, errors.New(err.Error() + " ON saveGridData")
 	}
