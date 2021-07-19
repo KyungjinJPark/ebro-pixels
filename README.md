@@ -14,6 +14,9 @@ Use `go install . && ebro-pixels.exe` to build and run
 
 ### Known Issues 🦗 (Moved to TODO)
 
+- getGrid will occasionally return nothing
+  - likely bc there is a read mid write
+
 ### The Done ✅
 
 - Create Go web server

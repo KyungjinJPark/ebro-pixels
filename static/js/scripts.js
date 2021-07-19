@@ -27,8 +27,15 @@ const getGrid = () => {
   Http.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       // IDK what this 4 is...
-      let newGridData = JSON.parse(this.responseText);
-      updateGrid(newGridData.Pixels);
+      let newGridData;
+      // KNOWN ISSUE occurs here
+      try {
+        newGridData = JSON.parse(this.responseText);
+        updateGrid(newGridData.Pixels);
+      } catch (error) {
+        console.error(`Data: "${this.responseText}"`);
+        console.error(error);
+      }
     }
   };
   Http.send();
@@ -217,7 +224,7 @@ const setUpGrid = (width, height, pixels) => {
 
   setInterval(() => {
     getGrid();
-  }, 100);
+  }, 20);
 };
 
 // Pallete code
