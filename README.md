@@ -2,19 +2,23 @@
 
 A lil pixel canvas for the 'eBro's. Built on Go just because.
 
+Use `go install . && ebro-pixels.exe` to build and run
+
 ## The Jira 📋
 
 ### The Todo
 
-- n😅thing
-
-### Known Issues 🦗
-
-- Any mouse click will draw https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
-- If you draw too fast:
-  - data/grid.json gets corrupted
+- Fix Known Issues
+  - Any mouse click will draw ✅
+  - If you draw too fast:
+    - data/grid.json gets corrupted
+      - make a queue of operations
   - "Error saving grid data: unexpected end of JSON input ON Unmarshal ON loadGridData"
-- App slows down over time
+- Is there a better way to send updates to clients?
+  - Maybe seperate TCP server
+- Decrease the number of storage read/writes w local copy
+
+### Known Issues 🦗 (Moved to TODO)
 
 ### The Done ✅
 

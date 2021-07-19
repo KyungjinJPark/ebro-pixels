@@ -44,13 +44,18 @@ const setUpGrid = (width, height, pixels) => {
   gridDiv.style.height = height * cellSize + "em";
 
   // Click and drag drawing code
-  const dragEnable = () => {
-    isDragging = true;
+  const dragEnable = (event) => {
+    // Make sure the M1 (button 0) is the button being pressed
+    if (event.button === 0) {
+      isDragging = true;
+    }
+  };
+  const dragDisable = (event) => {
+    if (event.button === 0) {
+      isDragging = false;
+    }
   };
   gridDiv.addEventListener("mousedown", dragEnable);
-  const dragDisable = () => {
-    isDragging = false;
-  };
   document.addEventListener("mouseup", dragDisable);
   document.addEventListener("dragstart", dragDisable);
   document.addEventListener("mouseleave", dragDisable);
@@ -158,7 +163,11 @@ const setUpGrid = (width, height, pixels) => {
       updatePreview();
     };
 
-    pixelDiv.onmousedown = () => {
+    pixelDiv.onmousedown = (event) => {
+      // Make sure the M1 (button 0) is the button being pressed
+      if (event.button !== 0) {
+        return;
+      }
       switch (currColor.tool) {
         case "point":
           draw();
@@ -177,7 +186,7 @@ const setUpGrid = (width, height, pixels) => {
           break;
       }
     };
-    pixelDiv.onmouseover = () => {
+    pixelDiv.onmouseover = (event) => {
       switch (currColor.tool) {
         case "point":
           if (isDragging) {
@@ -196,7 +205,7 @@ const setUpGrid = (width, height, pixels) => {
       }
     };
 
-    // Click and drag drawing code quirks
+    // Make pixels un-right-click-able
     pixelDiv.addEventListener("contextmenu", (e) => {
       e.preventDefault();
     });
